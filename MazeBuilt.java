@@ -1,138 +1,163 @@
 package maze;
+
 import java.awt.*;
 import java.util.ArrayList;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 
-public class MazeBuilt extends JFrame{
+public class MazeBuilt{
+	private JFrame  frame;
+	private JTextField textFieldStatus= null;
+	private JButton btnLoad = null;
+	private JButton btnStart = null;
+	private MazeReader maz;
+	private MazeSolver mazSolv;
 
-	/**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+	// The maze to be displayed
 
-    private JFrame frmMaze;
-	private JTextField textFieldStatus;
-	MazeReader maz;
-	MazeSolver mazSolv;
-	
-	//The maze to be displayed
-	
-	private char [][] maze;
-	
-	//Path
+	private char[][] maze;
+
+	// Path
 	private final ArrayList<Node> path = new ArrayList<Node>();
+	private MazePanel maze1 = new MazePanel();
 	private int pathIndex;
-	/**
-	 * Draw the maze
-	 */
-	@Override
-    public void paint(Graphics g) {
-		super.paint(g);
-		
-		maz = new MazeReader();
-		maze = maz.getMaze();
-		mazSolv = new MazeSolver(maze);
-		
-		mazSolv.findStart();
-		g.translate(50, 50);
-		for (int row = 0; row < maze.length; row++) {
-			for (int col = 0; col < maze[0].length; col++) {
-				Color color;
-				switch (maze[row][col]) {
-					case '#': color = Color.BLACK; break;
-					case 'o': color = Color.BLUE; break;
-					case '*': color = Color.GREEN; break;
-					default: color = Color.WHITE; 
-				}
-				g.setColor(color);
-				g.fillRect(50 * col, 50 * row, 50, 50);
-				g.setColor(Color.BLACK);
-				g.drawRect(50 * col, 50 * row, 50, 50);
-			}
-		}
-		Node n = mazSolv.solveMaze(path);
+	private int draw;
 
-		for (int p = 0; p < path.size();p++) {
-			int pathX = path.get(p).x;
-			int pathY = path.get(p).y;
-			g.setColor(Color.LIGHT_GRAY);
-			g.fillRect(pathX * 50, pathY * 50, 50, 50);
-		}
-		
-		while(n.getN() != null){
-            System.out.println(n);
-			n = n.getN();
-			int pathX = n.x;
-			int pathY = n.y;
-			g.setColor(Color.red);
-			g.fillOval(pathX * 50, pathY * 50, 50, 50);
-        }
-		
-	}
-	
 	/**
-	 * Initialize the contents of the frame.
+	 * Create the application.
 	 */
-	private void initialize() {
-		frmMaze = new JFrame();
-		frmMaze.setTitle("Maze");
-		frmMaze.setBounds(100, 100, 450, 300);
-		frmMaze.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmMaze.getContentPane().setLayout(null);
-		
-		JButton btnLoad = new JButton("Load");
+	public MazeBuilt() {
+		System.out.println("Hi");
+		btnLoad = new JButton("Load");
 		btnLoad.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnLoad.setBounds(22, 11, 69, 23);
-		frmMaze.getContentPane().add(btnLoad);
-		
-		JButton btnStart = new JButton("Start");
+		btnLoad.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+			   draw = 2;
+			   maze1.repaint();
+
+            }
+		});	
+		System.out.println("Hi1");
+
+		btnStart = new JButton("Start");
 		btnStart.setFont(new Font("Tahoma", Font.BOLD, 11));
 		btnStart.setBounds(101, 11, 69, 23);
-		frmMaze.getContentPane().add(btnStart);
+
+		btnStart.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+				draw = 1;
+				maze1.repaint();
+
+            }
+		});	
+		System.out.println("Hi3");
+
+		frame = new JFrame("Maze");
 		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setBounds(100, 100, 750, 650);
+
 		textFieldStatus = new JTextField();
 		textFieldStatus.setFont(new Font("Tahoma", Font.BOLD, 12));
 		textFieldStatus.setEditable(false);
 		textFieldStatus.setBounds(195, 11, 206, 20);
-		frmMaze.getContentPane().add(textFieldStatus);
 		textFieldStatus.setColumns(10);
-    }
-    
-    	/**
-	 * Create the application.
-	 */
-	public MazeBuilt() {
-		
-		setTitle("Maze");
-		setBounds(100, 100, 750, 650);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		textFieldStatus = new JTextField("Hello");
-		textFieldStatus.setFont(new Font("Tahoma", Font.BOLD, 12));
-		textFieldStatus.setEditable(false);
-		textFieldStatus.setBounds(0, 0, 0, 0);
-		
-		//DFS.searchPath(maze, 1, 1, path);
-		pathIndex = path.size() - 2;
-		System.out.println(path);
+
+		frame.add(textFieldStatus);
+		frame.add(btnLoad,BorderLayout.BEFORE_FIRST_LINE);
+		frame.add(btnStart,BorderLayout.PAGE_START);
+		frame.add(maze1);
+		frame.setVisible(true);
+		System.out.println("Hi4");
+
+
 	}
- 
-    /**
-    *  Launch the application.
-    */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    MazeBuilt window = new MazeBuilt();
-					window.setVisible(true);
-					
-                    
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
+
+	/**
+	 * Draw the maze
+	 */
+	private class MazePanel extends JPanel{
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+	
+			if(draw == 2){
+
+				maz = new MazeReader();
+				maze = maz.getMaze();
+				mazSolv = new MazeSolver(maze);
+		
+				mazSolv.findStart();
+				g.translate(50, 50);
+				for (int row = 0; row < maze.length; row++) {
+					for (int col = 0; col < maze[0].length; col++) {
+						Color color;
+						switch (maze[row][col]) {
+							case '#':
+								color = Color.BLACK;
+								break;
+							case 'o':
+								color = Color.BLUE;
+								break;
+							case '*':
+								color = Color.GREEN;
+								break;
+							default:
+								color = Color.WHITE;
+						}
+						g.setColor(color);
+						g.fillRect(50 * col, 50 * row, 50, 50);
+						g.setColor(Color.BLACK);
+						g.drawRect(50 * col, 50 * row, 50, 50);
+					}
+				}
+			}
+			if(draw == 1){
+				Node n = mazSolv.solveMaze(path);
+	
+				for (int p = 0; p < path.size(); p++) {
+					final int pathX = path.get(p).x;
+					final int pathY = path.get(p).y;
+					g.setColor(Color.LIGHT_GRAY);
+					g.fillRect(pathX * 50, pathY * 50, 50, 50);
+				}
+		
+				while (n.getN() != null) {
+					//System.out.println(n);
+					n = n.getN();
+					final int pathX = n.x;
+					final int pathY = n.y;
+					g.setColor(Color.red);
+					g.fillOval(pathX * 50, pathY * 50, 50, 50);
+				}
+			}
+			
+			
+		}
+
+	}
+	/**
+	 * Launch the application.
+	 */
+	public static void main(final String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MazeBuilt m = new MazeBuilt();
+					System.out.println("mazebuilt finished");
+
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 }
 
